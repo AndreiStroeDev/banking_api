@@ -14,6 +14,7 @@ class UserResponse(BaseModel):
     username: str
     email: EmailStr
     is_active: bool
+    is_admin: bool
 
     class Config:
         from_attributes = True

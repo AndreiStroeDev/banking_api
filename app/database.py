@@ -1,14 +1,14 @@
-from sqlalchemy import create_engine
+from databases import Database
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from app.config.settings import settings
 
-engine = create_engine(settings.DATABASE_URL)
+DATABASE_URL = settings.DATABASE_URL.replace("postgresql", "postgresql+asyncpg")
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+async_engine = create_async_engine(DATABASE_URL, future=True, echo=True)
+async_session = sessionmaker(async_engine, expire_on_commit=False, class_=AsyncSession)
+database = Database(DATABASE_URL)
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+async def get_db():
+    async with async_session() as session:
+        yield session

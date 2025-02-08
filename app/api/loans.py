@@ -1,23 +1,24 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.models.loan import Loan
-from app.models.user import User
-from app.schemas.loan_schema import LoanRequest
 from app.database import get_db
+from app.schemas.loan_schema import LoanRequest, LoanResponse
+from app.services.user_service import UserService
+from app.services.loan_service import LoanService
+from app.utils.dependencies import get_current_user
 
 router = APIRouter()
 
-@router.post("/apply/")
-def apply_for_loan(request: LoanRequest, db: Session = Depends(get_db)):
-    loan = Loan(user_id=request.user_id, amount=request.amount, duration_months=request.duration)
+@router.post("/apply/", response_model=LoanRequest)
+def apply_for_loan(request: LoanRequest, db: Session = Depends(get_db), user_email: str = Depends(get_current_user)):
+    user_service = UserService(db)
+    user_id = user_service.get_user_id_by_email(user_email)
+    loan_service = LoanService(db)
+    new_loan = loan_service.apply_for_loan(user_id, request)
+    return new_loan
 
-    db.add(loan)
-    db.commit()
-    db.refresh(loan)
-
-    return {"message": "Loan application successful", "loan_id": loan.id}
-
-@router.get("/{user_id}/")
-def get_user_loan(user_id: int, db: Session = Depends(get_db)):
-    loans = db.query(Loan).filter(Loan.user_id == user_id).all()
-    return loans
+@router.get("/", response_model=[LoanResponse])
+def get_user_loans(db: Session = Depends(get_db), user_email: str = Depends(get_current_user)):
+    user_service = UserService(db)
+    user_id = user_service.get_user_id_by_email(user_email)
+    loan_service = LoanService(db)
+    return loan_service.get_user_loans(user_id)
