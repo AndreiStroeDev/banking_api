@@ -13,3 +13,5 @@ class User(Base):
     is_admin = Column(Boolean, default=False)
 
     accounts = relationship("Account", back_populates="user", cascade="all, delete")
+    loans = relationship("Loan", back_populates="user", cascade="all, delete")
+    transactions = relationship("Transaction", back_populates="user", cascade="all, delete")

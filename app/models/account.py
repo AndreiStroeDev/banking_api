@@ -11,6 +11,7 @@ class Account(Base):
     balance = Column(Float, default=0.0)
 
     user = relationship("User", back_populates="accounts")
+    transactions = relationship("Transaction", back_populates="account", cascade="all, delete")
 
     def deposit(self, amount: float):
         self.balance += amount
@@ -20,4 +21,4 @@ class Account(Base):
         if amount > self.balance:
             return {"message": "Insufficient funds"}
         self.balance -= amount
-        return {"message:" f"Withdrew {amount}. New Balance: {self.balance}"}
+        return {"message": f"Withdrew {amount}. New Balance: {self.balance}"}

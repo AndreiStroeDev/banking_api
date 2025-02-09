@@ -14,6 +14,7 @@ class TransferRequest(BaseModel):
 class TransactionResponse(TransactionBase):
     id: int
     user_id: int
+    account_id: int
 
     class Config:
         from_attributes = True

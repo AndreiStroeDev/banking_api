@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 
 class LoanRequest(BaseModel):
-    user_id: int
     amount: float
     duration_months: int
 

@@ -16,3 +16,10 @@ class UserRepository:
         db.commit()
         db.refresh(user)
         return user
+    
+    @staticmethod
+    def delete_user(db:Session, user_id: int):
+        user = db.query(User).filter(User.id == user_id).first()
+        if user:
+            db.delete(user)
+            db.commit()

@@ -15,4 +15,4 @@ class Loan(Base):
     user = relationship("User", back_populates="loans")
 
     def calculate_total_amount(self):
-        return self.amount * (1 + self.interest_rate * (self.duration_month / 12))
+        return self.amount * (1 + self.interest_rate * (self.duration_months / 12))

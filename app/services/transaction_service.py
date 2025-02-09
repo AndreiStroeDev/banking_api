@@ -17,6 +17,7 @@ class TransactionService:
 
         transaction = Transaction(
             user_id=user_id,
+            account_id=account_id,
             type="deposit",
             amount=amount
         )
@@ -43,8 +44,8 @@ class TransactionService:
         self.db.commit()
         return transaction
 
-    def transfer(self, sender_id: int, receiver_account_id: int, amount: float) -> dict:
-        sender_account = AccountRepository.get_account_by_user_id(self.db, sender_id)
+    def transfer(self, sender_id, sender_account_id: int, receiver_account_id: int, amount: float) -> dict:
+        sender_account = AccountRepository.get_account_by_user_id(self.db, sender_account_id)
         receiver_account = AccountRepository.get_account_by_id(self.db, receiver_account_id)
 
         if not sender_account or not receiver_account:

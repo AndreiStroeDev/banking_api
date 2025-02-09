@@ -19,9 +19,9 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
 @router.post("/login/")
 def login(user: UserLogin, db: Session = Depends(get_db)):
     auth_service = AuthService(db)
-
-    return auth_service.authenticate_user(user)
+    token, expiry = auth_service.authenticate_user(user)
+    return {"access_token": token, "token_type": "bearer", "expires_in": expiry}
 
 @router.get("/users/me")
-def get_current_user_profile(user_email: str = Depends(get_current_user)):
-    return {"email": user_email}
+def get_current_user_profile(user: str = Depends(get_current_user)):
+    return user

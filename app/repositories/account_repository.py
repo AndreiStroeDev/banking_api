@@ -7,5 +7,5 @@ class AccountRepository:
         return db.query(Account).filter(Account.id == account_id).first()
 
     @staticmethod
-    def get_account_by_user_id(db: Session, user_id: int) -> Account:
-        return db.query(Account).filter(Account.user_id == user_id).first()
+    def get_account_by_user_id(db: Session, user_id: int) -> list[Account]:
+        return db.query(Account).filter(Account.user_id == user_id).all()
