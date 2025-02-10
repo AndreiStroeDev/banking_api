@@ -4,7 +4,7 @@ from app.models.account import Account
 from app.repositories.transaction_repository import TransactionRepository
 from app.repositories.account_repository import AccountRepository
 from app.models.transaction import Transaction
-from app.utils.exceptions import AccountNotFoundException, InsufficientFundsException, UnauthorizedAccessException
+from app.utils.exceptions import AccountNotFoundException, InsufficientFundsException
 
 class TransactionService:
     def __init__(self, db: Session):
@@ -13,7 +13,7 @@ class TransactionService:
     def deposit(self, user_id: int, account_id: int, amount: float) -> Transaction:
         account = AccountRepository.get_account_by_id(self.db, account_id)
         if not account or account.user_id != user_id:
-            raise HTTPException(status_code=404, detail="Account not found or unauthorized access")
+            raise AccountNotFoundException()
 
         transaction = Transaction(
             user_id=user_id,
@@ -24,15 +24,16 @@ class TransactionService:
         TransactionRepository.record_transaction(self.db, transaction)
         account.balance += amount
         self.db.commit()
+        
         return transaction
 
     def withdraw(self, user_id: int, account_id: int, amount: float) -> Transaction:
         account = AccountRepository.get_account_by_id(self.db, account_id)
         if not account or account.user_id != user_id:
-            raise HTTPException(status_code=404, detail="Account not found or unauthorized access")
+            raise AccountNotFoundException()
 
         if account.balance < amount:
-            raise HTTPException(status_code=400, detail="Insufficient funds")
+            raise InsufficientFundsException()
 
         transaction = Transaction(
             user_id=user_id,
@@ -49,10 +50,10 @@ class TransactionService:
         receiver_account = AccountRepository.get_account_by_id(self.db, receiver_account_id)
 
         if not sender_account or not receiver_account:
-            raise HTTPException(status_code=404, detail="Sender or receiver account not found")
+            raise AccountNotFoundException()
 
         if sender_account.balance < amount:
-            raise HTTPException(status_code=400, detail="Insufficient funds")
+            raise InsufficientFundsException()
 
         # Deduct from sender
         sender_transaction = Transaction(

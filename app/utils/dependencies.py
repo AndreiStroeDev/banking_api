@@ -3,9 +3,10 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
 from app.services.user_service import UserService
+from app.services.user_service import User
 from app.database import get_db
 from app.config.settings import settings
-from app.utils.exceptions import UserNotFound
+from app.utils.exceptions import UserNotFoundException
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
@@ -21,7 +22,7 @@ def decode_jwt(token: str = Depends(oauth2_scheme)):
         )
 
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
     payload = decode_jwt(token)
     user_email: str = payload.get("sub")
 
@@ -35,6 +36,6 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     user_service = UserService(db)
     user = user_service.get_user_id_by_email(user_email)
     if not user:
-        raise UserNotFound()
+        raise UserNotFoundException()
     
     return user

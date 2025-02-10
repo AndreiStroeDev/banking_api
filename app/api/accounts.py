@@ -4,7 +4,7 @@ from app.schemas.account_schema import AccountCreate, AccountResponse
 from app.services.account_service import AccountService
 from app.models.account import Account
 from app.models.user import User
-from app.utils.exceptions import UserNotFound, NoAccountsForUser
+from app.utils.exceptions import UserNotFoundException, NoAccountsForUserException
 from app.utils.dependencies import get_current_user
 from app.database import get_db
 
