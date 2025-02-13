@@ -1,16 +1,16 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.user_service import UserService
 from app.services.user_service import User
 from app.database import get_db
 from app.config.settings import settings
 from app.utils.exceptions import UserNotFoundException
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-def decode_jwt(token: str = Depends(oauth2_scheme)):
+async def decode_jwt(token: str = Depends(oauth2_scheme)):
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         return payload
@@ -22,8 +22,8 @@ def decode_jwt(token: str = Depends(oauth2_scheme)):
         )
 
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
-    payload = decode_jwt(token)
+async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)) -> User:
+    payload = await decode_jwt(token)
     user_email: str = payload.get("sub")
 
     if user_email is None:
@@ -34,7 +34,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         )
     
     user_service = UserService(db)
-    user = user_service.get_user_id_by_email(user_email)
+    user = await user_service.get_user_id_by_email(user_email)
     if not user:
         raise UserNotFoundException()
     

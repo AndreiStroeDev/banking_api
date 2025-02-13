@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.user import User
 from app.schemas.user_schema import UserCreate
 from app.utils.security import hash_password
@@ -6,11 +6,11 @@ from app.repositories.user_repository import UserRepository
 from app.utils.exceptions import UserNotFoundException, UserAlreadyExistsException
 
 class UserService:
-    def __init__(self, db:Session):
+    def __init__(self, db:AsyncSession):
         self.db = db
 
-    def create_user(self, user_data: UserCreate, is_admin=False):
-        existing_user = UserRepository.get_user_by_email(self.db, user_data.email)
+    async def create_user(self, user_data: UserCreate, is_admin=False):
+        existing_user = await UserRepository.get_user_by_email(self.db, user_data.email)
         if existing_user:
             raise UserAlreadyExistsException()
         
@@ -21,10 +21,11 @@ class UserService:
             is_admin = is_admin
         )
         
-        return UserRepository.create_user(self.db, new_user)
+        created_user = await UserRepository.create_user(self.db, new_user)
+        return created_user
     
-    def get_user_id_by_email(self, email: str) -> int:
-        user = UserRepository.get_user_by_email(self.db, email)
+    async def get_user_id_by_email(self, email: str) -> int:
+        user = await UserRepository.get_user_by_email(self.db, email)
         if not user:
             raise UserNotFoundException()
         return user.id

@@ -1,14 +1,16 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from app.models.loan import Loan
 
 class LoanRepository:
     @staticmethod
-    def create_loan(db: Session, loan: Loan):
+    async def create_loan(db: AsyncSession, loan: Loan):
         db.add(loan)
-        db.commit()
-        db.refresh(loan)
+        await db.commit()
+        await db.refresh(loan)
         return loan
     
     @staticmethod
-    def get_loans_by_user(db: Session, user_id:int):
-        return db.query(Loan).filter(Loan.user_id == user_id).all()
+    async def get_loans_by_user(db: AsyncSession, user_id:int):
+        result = await db.execute(select(Loan).filter(Loan.user_id == user_id))
+        return result.scalars().all()

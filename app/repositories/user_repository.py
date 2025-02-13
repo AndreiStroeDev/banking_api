@@ -1,25 +1,35 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from app.models.user import User
 
 class UserRepository:
     @staticmethod
-    def get_user_by_id(db:Session, user_id: int):
-        return db.query(User).filter(User.id == user_id).first()
+    async def get_user_by_id(db:AsyncSession, user_id: int):
+        stmt = select(User).where(User.id == user_id)
+        result = await db.execute(stmt)
+
+        return result.scalars().first()
     
     @staticmethod
-    def get_user_by_email(db:Session, email: str):
-        return db.query(User).filter(User.email == email).first()
+    async def get_user_by_email(db:AsyncSession, email: str):
+        stmt = select(User).where(User.email == email)
+        result = await db.execute(stmt)
+
+        return result.scalars().first()
     
     @staticmethod
-    def create_user(db:Session, user: User):
+    async def create_user(db:AsyncSession, user: User):
         db.add(user)
-        db.commit()
-        db.refresh(user)
+        await db.commit()
+        await db.refresh(user)
         return user
     
     @staticmethod
-    def delete_user(db:Session, user_id: int):
-        user = db.query(User).filter(User.id == user_id).first()
+    async def delete_user(db:AsyncSession, user_id: int):
+        stmt = select(User).where(User.id == user_id)
+        result = await db.execute(stmt)
+        user = result.scalars().first()
+
         if user:
-            db.delete(user)
-            db.commit()
+            await db.delete(user)
+            await db.commit()

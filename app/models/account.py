@@ -13,12 +13,12 @@ class Account(Base):
     user = relationship("User", back_populates="accounts")
     transactions = relationship("Transaction", back_populates="account", cascade="all, delete")
 
-    def deposit(self, amount: float):
-        self.balance += amount
-        return {"message": f"Deposited {amount}. New Balance: {self.balance}"}
+    # def deposit(self, amount: float):
+    #     self.balance += amount
+    #     return {"message": f"Deposited {amount}. New Balance: {self.balance}"}
     
-    def withdraw(self, amount: float):
-        if amount > self.balance:
-            return {"message": "Insufficient funds"}
-        self.balance -= amount
-        return {"message": f"Withdrew {amount}. New Balance: {self.balance}"}
+    # def withdraw(self, amount: float):
+    #     if amount > self.balance:
+    #         return {"message": "Insufficient funds"}
+    #     self.balance -= amount
+    #     return {"message": f"Withdrew {amount}. New Balance: {self.balance}"}
